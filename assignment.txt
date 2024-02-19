@@ -1,0 +1,66 @@
+// Database Requirements:
+// Create a database named ToDoDB.
+use ToDoDB
+
+// Design a collection named tasks.
+db.createCollection("tasks")
+
+// Each task should have information like title, description, status (e.g., "Pending," "Completed"), and due date.
+
+// CRUD Operations:
+// Create Operation:
+// Insert at least 5 tasks with various titles, descriptions, statuses, and due dates.
+db.tasks.insertMany([
+  { title: "Assignment", description: "MongoDb Assignment", status: "Pending", due_date: new Date("2024-02-16") },
+  { title: "Evaluation", description: "JavaScript", status: "Completed", due_date: new Date("2024-02-16") },
+  { title: "Session", description: "HTTP", status: "Pending", due_date: new Date("2024-02-20") },
+  { title: "Test", description: "SQL Test", status: "Completed", due_date: new Date("2024-02-10") },
+  { title: "Session", description: "HTML sessions", status: "Completed", due_date: new Date("2024-01-26") }
+]);
+
+// Read Operation:
+// Retrieve and display all tasks in the database.
+db.tasks.find()
+
+// Display the details of a specific task by searching with its title or status.
+db.tasks.findOne({title: "Test"})
+db.tasks.findOne({ status: "Completed" })
+
+// List all tasks that are pending or completed.
+db.tasks.find({status: "Pending"})
+
+// List of all task which is still pending after due date.
+db.tasks.find({status: "Pending", due_date: {$lt: new Date()}})
+
+// Show all task in pending key and completed key {pending: [task....], completed: [task...]}
+db.tasks.aggregate([
+  {
+    $group: {
+      _id: "$status",
+      tasks: { $push: "$$ROOT" }
+    }
+  }
+])
+
+// Update Operation:
+// Update the status of a specific task (e.g., from "Pending" to "Completed").
+db.tasks.updateOne({ title: "Session" }, { $set: { status: "Completed" } })
+
+// Update the due date of a task.
+db.tasks.updateOne({ title: "Test" }, { $set: { dueDate: new Date("2024-02-25") } })
+
+// Update all pending task which due date is less than 2 days from today.
+var twoDaysFromNow = new Date();
+twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
+
+db.tasks.updateMany(
+  { status: "Pending", dueDate: { $lt: twoDaysFromNow } }, 
+  { $set: { status: "Within 2 days" } }
+);
+
+// Delete Operation:
+// Remove a task by its title or status.
+db.tasks.deleteOne({ title: "Test" })
+
+// Delete all completed tasks.
+db.tasks.deleteMany({ status: "Completed" })
