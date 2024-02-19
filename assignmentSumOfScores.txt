@@ -1,0 +1,18 @@
+[
+  {
+    $project: {
+      names: "$name",
+      "Sum of scores": {
+        $sum: {
+          $reduce: {
+            input: "$scores",
+            initialValue: 0,
+            in: {
+              $add: ["$$value", "$$this.score"],
+            },
+          },
+        },
+      },
+    },
+  },
+]
