@@ -1,0 +1,47 @@
+[
+  {
+    $unwind: {
+      path: "$scores",
+      includeArrayIndex: "num",
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+]
+
+
+[
+  {
+    $facet: {
+      unwindScores: [{ $unwind: "$scores" }],
+      groupByScore: [
+        {
+          $group: {
+            _id: "$_id",
+          },
+        },
+      ],
+    },
+  },
+]
+
+
+[
+  {
+    $lookup: {
+      from: "students",
+      let: {
+        name: "$name",
+      },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $eq: ["$employeeName", "$$name"],
+            },
+          },
+        },
+      ],
+      as: "result",
+    },
+  },
+]
